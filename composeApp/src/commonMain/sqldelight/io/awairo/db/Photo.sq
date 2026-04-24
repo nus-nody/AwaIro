@@ -1,0 +1,34 @@
+CREATE TABLE Photo (
+    id TEXT NOT NULL PRIMARY KEY,
+    captured_at INTEGER NOT NULL,
+    developed_at INTEGER NOT NULL,
+    image_path TEXT NOT NULL,
+    memo TEXT NOT NULL,
+    area_label TEXT NOT NULL
+);
+
+CREATE INDEX photo_captured_at ON Photo(captured_at);
+
+insertPhoto:
+INSERT INTO Photo(id, captured_at, developed_at, image_path, memo, area_label)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectById:
+SELECT * FROM Photo WHERE id = ?;
+
+selectByDateRange:
+SELECT * FROM Photo
+WHERE captured_at >= ? AND captured_at < ?
+ORDER BY captured_at ASC;
+
+selectDeveloped:
+SELECT * FROM Photo
+WHERE developed_at <= ?
+ORDER BY captured_at DESC;
+
+countByDateRange:
+SELECT COUNT(*) FROM Photo
+WHERE captured_at >= ? AND captured_at < ?;
+
+deleteById:
+DELETE FROM Photo WHERE id = ?;
