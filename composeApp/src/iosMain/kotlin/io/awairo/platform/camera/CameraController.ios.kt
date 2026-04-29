@@ -8,10 +8,13 @@ import platform.AVFoundation.AVCaptureDeviceInput
 import platform.AVFoundation.AVCapturePhoto
 import platform.AVFoundation.AVCapturePhotoCaptureDelegate
 import platform.AVFoundation.AVCapturePhotoOutput
+import platform.AVFoundation.AVCaptureInput
+import platform.AVFoundation.AVCaptureOutput
 import platform.AVFoundation.AVCapturePhotoSettings
 import platform.AVFoundation.AVCaptureSession
+import platform.AVFoundation.AVVideoCodecKey
+import platform.AVFoundation.AVVideoCodecTypeJPEG
 import platform.AVFoundation.AVCaptureSessionPresetPhoto
-import platform.AVFoundation.AVCaptureVideoPreviewLayer
 import platform.AVFoundation.AVMediaTypeVideo
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSError
@@ -74,7 +77,9 @@ actual class CameraController {
                 AVAuthorizationStatusAuthorized
 
     actual suspend fun capture(): String? = suspendCancellableCoroutine { cont ->
-        val settings = AVCapturePhotoSettings()
+        val settings = AVCapturePhotoSettings.photoSettingsWithFormat(
+            mapOf(AVVideoCodecKey to AVVideoCodecTypeJPEG)
+        )
         val filename = "${NSUUID().UUIDString}.jpg"
         val filePath = "$photosDir/$filename"
 
@@ -103,8 +108,10 @@ actual class CameraController {
     }
 
     actual fun release() {
-        if (session.running) {
-            session.stopRunning()
-        }
+        if (session.running) session.stopRunning()
+        session.beginConfiguration()
+        session.inputs.toList().forEach { session.removeInput(it as AVCaptureInput) }
+        session.outputs.toList().forEach { session.removeOutput(it as AVCaptureOutput) }
+        session.commitConfiguration()
     }
 }
