@@ -49,8 +49,9 @@ actual fun CameraPreview(
         },
         update = { view ->
             // UIKitView がリサイズされるたびに previewLayer のフレームを更新
+            // filterIsInstance is unreliable on ObjC-bridged NSArray — use as? for isKindOfClass: semantics
             val previewLayer = view.layer.sublayers
-                ?.filterIsInstance<AVCaptureVideoPreviewLayer>()
+                ?.mapNotNull { it as? AVCaptureVideoPreviewLayer }
                 ?.firstOrNull()
             CATransaction.begin()
             CATransaction.setValue(true, forKey = kCATransactionDisableActions)
