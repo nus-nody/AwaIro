@@ -38,6 +38,7 @@ actual class CameraController(private val context: Context) {
                     cont.resume(file.absolutePath)
                 }
                 override fun onError(exception: ImageCaptureException) {
+                    file.delete() // 失敗したファイルを削除してクリーンアップ
                     cont.resume(null)
                 }
             }
