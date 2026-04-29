@@ -53,11 +53,22 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines)
             implementation(libs.androidx.lifecycle.viewmodel)
+            // Sprint 1 追加
+            implementation(libs.coil.compose)
+            implementation(libs.coil.core)
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation(libs.kotlinx.coroutines.test)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.sqldelight.android.driver)
+            // Sprint 1 追加
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.lifecycle)
+            implementation(libs.androidx.camera.view)
         }
         iosMain.dependencies {
             implementation(libs.sqldelight.native.driver)
