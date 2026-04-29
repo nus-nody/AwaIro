@@ -5,23 +5,25 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.AVFoundation.AVAuthorizationStatusAuthorized
 import platform.AVFoundation.AVCaptureDevice
 import platform.AVFoundation.AVCaptureDeviceInput
-import platform.AVFoundation.AVCapturePhoto
-import platform.AVFoundation.AVCapturePhotoCaptureDelegate
-import platform.AVFoundation.AVCapturePhotoOutput
 import platform.AVFoundation.AVCaptureInput
 import platform.AVFoundation.AVCaptureOutput
+import platform.AVFoundation.AVCapturePhoto
+import platform.AVFoundation.AVCapturePhotoCaptureDelegateProtocol
+import platform.AVFoundation.AVCapturePhotoOutput
 import platform.AVFoundation.AVCapturePhotoSettings
 import platform.AVFoundation.AVCaptureSession
-import platform.AVFoundation.AVVideoCodecKey
-import platform.AVFoundation.AVVideoCodecTypeJPEG
 import platform.AVFoundation.AVCaptureSessionPresetPhoto
 import platform.AVFoundation.AVMediaTypeVideo
+import platform.AVFoundation.AVVideoCodecKey
+import platform.AVFoundation.AVVideoCodecTypeJPEG
+import platform.AVFoundation.authorizationStatusForMediaType
+import platform.AVFoundation.fileDataRepresentation
 import platform.Foundation.NSApplicationSupportDirectory
 import platform.Foundation.NSError
 import platform.Foundation.NSFileManager
+import platform.darwin.NSObject
 import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSUserDomainMask
-import platform.Foundation.NSURL
 import platform.Foundation.NSUUID
 import platform.Foundation.writeToFile
 import kotlin.coroutines.resume
@@ -85,7 +87,7 @@ actual class CameraController {
 
         photoOutput.capturePhotoWithSettings(
             settings,
-            delegate = object : AVCapturePhotoCaptureDelegate {
+            delegate = object : NSObject(), AVCapturePhotoCaptureDelegateProtocol {
                 override fun captureOutput(
                     output: AVCapturePhotoOutput,
                     didFinishProcessingPhoto: AVCapturePhoto,
@@ -95,8 +97,7 @@ actual class CameraController {
                         cont.resume(null)
                         return
                     }
-                    val data = didFinishProcessingPhoto.fileDataRepresentation()
-                    if (data == null) {
+                    val data = didFinishProcessingPhoto.fileDataRepresentation() ?: run {
                         cont.resume(null)
                         return
                     }

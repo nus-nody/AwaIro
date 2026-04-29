@@ -28,7 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import coil3.ImageLoader
 import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
 import io.awairo.platform.deletePhotoFile
 import io.awairo.presentation.viewmodel.MemoViewModel
 import org.koin.compose.viewmodel.koinViewModel
@@ -42,6 +44,8 @@ fun MemoScreen(
 ) {
     val saveState by viewModel.saveState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val platformContext = LocalPlatformContext.current
+    val imageLoader = remember(platformContext) { ImageLoader(platformContext) }
     var memo by remember { mutableStateOf("") }
 
     // 保存成功 → onSaved を呼ぶ
@@ -76,6 +80,7 @@ fun MemoScreen(
             AsyncImage(
                 model = absoluteImagePath,
                 contentDescription = "撮影した写真",
+                imageLoader = imageLoader,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .size(200.dp)
