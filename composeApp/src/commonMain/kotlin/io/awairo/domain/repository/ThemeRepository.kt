@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 interface ThemeRepository {
     fun observeThemeMode(): StateFlow<ThemeMode>
-    suspend fun setThemeMode(mode: ThemeMode)
+    fun setThemeMode(mode: ThemeMode)
     fun observeSkyPalette(): StateFlow<SkyPalette>
-    suspend fun setSkyPalette(palette: SkyPalette)
+    fun setSkyPalette(palette: SkyPalette)
 }

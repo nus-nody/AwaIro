@@ -17,16 +17,18 @@ class SettingsThemeRepository(
 
     override fun observeThemeMode(): StateFlow<ThemeMode> = mode.asStateFlow()
 
-    override suspend fun setThemeMode(mode: ThemeMode) {
-        settings.putString(KEY_MODE, mode.name)
+    override fun setThemeMode(mode: ThemeMode) {
+        // 先に in-memory を更新して UI を即座に反映、その後に永続化。
+        // 永続化が失敗しても画面表示はユーザー操作と一致する。
         this.mode.value = mode
+        settings.putString(KEY_MODE, mode.name)
     }
 
     override fun observeSkyPalette(): StateFlow<SkyPalette> = palette.asStateFlow()
 
-    override suspend fun setSkyPalette(palette: SkyPalette) {
-        settings.putString(KEY_PALETTE, palette.name)
+    override fun setSkyPalette(palette: SkyPalette) {
         this.palette.value = palette
+        settings.putString(KEY_PALETTE, palette.name)
     }
 
     private fun loadMode(): ThemeMode = settings.getStringOrNull(KEY_MODE)
