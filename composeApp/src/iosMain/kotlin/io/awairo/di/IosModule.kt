@@ -13,7 +13,12 @@ fun iosModule() = module {
     // Sprint 1
     single { CameraController() }
     // Sprint 2
-    single<Settings> { NSUserDefaultsSettings(NSUserDefaults.standardUserDefaults) }
+    single<Settings> {
+        NSUserDefaultsSettings(
+            NSUserDefaults.standardUserDefaults
+                ?: error("NSUserDefaults.standardUserDefaults is null")
+        )
+    }
 }
 
 fun initKoinForIos() {
