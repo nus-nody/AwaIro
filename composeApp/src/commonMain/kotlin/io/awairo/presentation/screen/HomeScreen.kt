@@ -1,5 +1,6 @@
 package io.awairo.presentation.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +15,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import io.awairo.platform.camera.CameraController
+import io.awairo.presentation.component.BottomActionBar
 import io.awairo.presentation.component.BubbleCameraView
 import io.awairo.presentation.component.GrayedOutBubble
+import io.awairo.presentation.theme.LocalSkyTheme
 import io.awairo.presentation.viewmodel.HomeViewModel
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -25,38 +29,49 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun HomeScreen(
     onPhotoCaptured: (absoluteImagePath: String) -> Unit,
+    onOpenGallery: () -> Unit = {},   // default は Task 15 で App.kt が実コールバックを渡すまでの暫定値
+    onOpenMenu: () -> Unit = {},
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val isTodayPhotoTaken by viewModel.isTodayPhotoTaken.collectAsState()
     val cameraController = koinInject<CameraController>()
+    val theme = LocalSkyTheme.current
 
-    // 画面に戻ってきたときに状態を再チェック
-    LaunchedEffect(Unit) {
-        viewModel.refreshTodayStatus()
-    }
+    LaunchedEffect(Unit) { viewModel.refreshTodayStatus() }
 
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(theme.backgroundTop, theme.backgroundBottom))),
     ) {
-        if (isTodayPhotoTaken) {
-            // 撮影済み → グレーアウトした泡
-            GrayedOutBubble()
-        } else {
-            // 未撮影 → カメラプレビューの泡
-            if (cameraController.hasPermission()) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            if (isTodayPhotoTaken) {
+                GrayedOutBubble()
+            } else if (cameraController.hasPermission()) {
                 BubbleCameraView(
                     controller = cameraController,
                     onCaptured = { path ->
                         viewModel.refreshTodayStatus()
                         onPhotoCaptured(path)
-                    }
+                    },
                 )
             } else {
-                // パーミッション未許可状態の表示
                 CameraPermissionUI(cameraController = cameraController)
             }
         }
+
+        BottomActionBar(
+            leftLabel = "泡たち",
+            leftIcon = "○",
+            onLeftClick = onOpenGallery,
+            rightLabel = "メニュー",
+            rightIcon = "⊙",
+            onRightClick = onOpenMenu,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
