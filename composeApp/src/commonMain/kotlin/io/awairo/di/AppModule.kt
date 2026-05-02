@@ -11,6 +11,7 @@ import io.awairo.domain.usecase.RecordPhotoUseCase
 import io.awairo.presentation.viewmodel.GalleryViewModel
 import io.awairo.presentation.viewmodel.HomeViewModel
 import io.awairo.presentation.viewmodel.MemoViewModel
+import io.awairo.presentation.viewmodel.PhotoDetailViewModel
 import io.awairo.presentation.viewmodel.ThemeViewModel
 import kotlinx.datetime.Clock
 import org.koin.core.module.dsl.viewModel
@@ -29,5 +30,5 @@ fun appModule() = module {
     factory { DevelopPhotoUseCase(get(), get()) }
     viewModel { ThemeViewModel(get()) }
     viewModel { GalleryViewModel(get()) }
-    // PhotoDetailViewModel は Task 14 で追加する
+    viewModel { PhotoDetailViewModel(get(), get()) }
 }
