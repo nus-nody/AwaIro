@@ -31,5 +31,6 @@ data class DevelopedPhoto(
     val isDeveloped: Boolean,
     val remaining: Duration
 ) {
+    /** [photo] の id への簡易アクセサ。equals/hashCode には含まれない。 */
     val id: String get() = photo.id
 }
