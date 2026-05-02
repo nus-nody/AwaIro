@@ -44,6 +44,14 @@ class LocalPhotoRepository(
         database.photoQueries.deleteById(id)
     }
 
+    override suspend fun findAllOrderByCapturedAtDesc(): List<Photo> =
+        database.photoQueries.selectAllOrderByCapturedAtDesc()
+            .executeAsList().map { it.toDomain() }
+
+    override suspend fun updateMemo(id: String, memo: String) {
+        database.photoQueries.updateMemo(memo = memo, id = id)
+    }
+
     private fun io.awairo.db.Photo.toDomain() = Photo(
         id = id,
         capturedAt = Instant.fromEpochMilliseconds(captured_at),
