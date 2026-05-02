@@ -8,6 +8,7 @@ import io.awairo.domain.repository.PhotoRepository
 import io.awairo.domain.repository.ThemeRepository
 import io.awairo.domain.usecase.DevelopPhotoUseCase
 import io.awairo.domain.usecase.RecordPhotoUseCase
+import io.awairo.presentation.viewmodel.GalleryViewModel
 import io.awairo.presentation.viewmodel.HomeViewModel
 import io.awairo.presentation.viewmodel.MemoViewModel
 import io.awairo.presentation.viewmodel.ThemeViewModel
@@ -27,5 +28,6 @@ fun appModule() = module {
     single<ThemeRepository> { SettingsThemeRepository(get()) }
     factory { DevelopPhotoUseCase(get(), get()) }
     viewModel { ThemeViewModel(get()) }
-    // GalleryViewModel と PhotoDetailViewModel は Task 13 / Task 14 で追加する
+    viewModel { GalleryViewModel(get()) }
+    // PhotoDetailViewModel は Task 14 で追加する
 }
