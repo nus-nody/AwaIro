@@ -36,6 +36,14 @@ class FakePhotoRepository : PhotoRepository {
         savedPhotos.removeAll { it.id == id }
     }
 
+    override suspend fun findAllOrderByCapturedAtDesc(): List<Photo> =
+        savedPhotos.sortedByDescending { it.capturedAt }
+
+    override suspend fun updateMemo(id: String, memo: String) {
+        val index = savedPhotos.indexOfFirst { it.id == id }
+        if (index >= 0) savedPhotos[index] = savedPhotos[index].copy(memo = memo)
+    }
+
     /** テスト用: 今日の日付の写真を1枚追加する */
     fun addPhotoForToday() {
         val now = kotlinx.datetime.Clock.System.now()
