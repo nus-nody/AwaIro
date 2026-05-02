@@ -5,6 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 
 class PhotoTest {
@@ -55,7 +56,7 @@ class PhotoTest {
             developedAt = Instant.parse("2026-05-03T00:00:00Z")
         )
         val now = Instant.parse("2026-05-04T00:00:00Z")
-        assertEquals(kotlin.time.Duration.ZERO, photo.remainingUntilDeveloped(now))
+        assertEquals(Duration.ZERO, photo.remainingUntilDeveloped(now))
     }
 
     @Test
@@ -66,5 +67,15 @@ class PhotoTest {
         )
         val now = Instant.parse("2026-05-02T18:00:00Z")
         assertEquals(6.hours, photo.remainingUntilDeveloped(now))
+    }
+
+    @Test
+    fun remainingUntilDeveloped_returnsZero_atExactBoundary() {
+        val developedAt = Instant.parse("2026-05-03T00:00:00Z")
+        val photo = makePhoto(
+            capturedAt = Instant.parse("2026-05-02T00:00:00Z"),
+            developedAt = developedAt
+        )
+        assertEquals(Duration.ZERO, photo.remainingUntilDeveloped(developedAt))
     }
 }
