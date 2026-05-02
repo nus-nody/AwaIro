@@ -1,5 +1,7 @@
 package io.awairo.di
 
+import coil3.ImageLoader
+import coil3.PlatformContext
 import io.awairo.data.local.DatabaseFactory
 import io.awairo.data.repository.LocalPhotoRepository
 import io.awairo.data.repository.SettingsThemeRepository
@@ -31,4 +33,6 @@ fun appModule() = module {
     viewModel { ThemeViewModel(get()) }
     viewModel { GalleryViewModel(get()) }
     viewModel { PhotoDetailViewModel(get(), get()) }
+    // Coil ImageLoader singleton — shared across all screens
+    single<ImageLoader> { ImageLoader.Builder(get<PlatformContext>()).build() }
 }

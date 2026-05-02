@@ -30,8 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
 import io.awairo.presentation.theme.LocalSkyTheme
+import org.koin.compose.koinInject
 import kotlin.math.abs
 import kotlin.time.Duration
 
@@ -103,8 +103,7 @@ fun BubbleGalleryItem(
     ) {
         // 写真 or 透明背景
         if (isDeveloped && imagePath != null) {
-            val ctx = LocalPlatformContext.current
-            val loader = remember(ctx) { ImageLoader(ctx) }
+            val loader = koinInject<ImageLoader>()
             AsyncImage(
                 model = imagePath,
                 imageLoader = loader,

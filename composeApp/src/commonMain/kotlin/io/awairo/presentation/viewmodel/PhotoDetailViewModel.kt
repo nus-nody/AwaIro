@@ -33,10 +33,16 @@ class PhotoDetailViewModel(
     }
 
     fun updateMemo(photoId: String, newMemo: String) {
+        // 楽観的更新: DB 書き込みより前に in-memory state を更新して、UI を即時反映する
+        val currentList = _developedPhotos.value
+        val idx = currentList.indexOfFirst { it.id == photoId }
+        if (idx >= 0) {
+            val current = currentList[idx]
+            val updated = current.copy(photo = current.photo.copy(memo = newMemo))
+            _developedPhotos.value = currentList.toMutableList().also { it[idx] = updated }
+        }
         viewModelScope.launch {
             repository.updateMemo(photoId, newMemo)
-            // メモ反映のためリストを更新
-            _developedPhotos.value = developPhoto().filter { it.isDeveloped }
         }
     }
 }

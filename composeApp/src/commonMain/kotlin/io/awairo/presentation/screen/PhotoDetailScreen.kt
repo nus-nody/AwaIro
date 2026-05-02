@@ -34,8 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.ImageLoader
 import coil3.compose.AsyncImage
-import coil3.compose.LocalPlatformContext
 import io.awairo.presentation.theme.LocalSkyTheme
+import org.koin.compose.koinInject
 import io.awairo.presentation.viewmodel.PhotoDetailViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Instant
@@ -114,8 +114,7 @@ private fun DetailPage(
     val theme = LocalSkyTheme.current
     var editing by remember { mutableStateOf(false) }
     var draft by remember(memo) { mutableStateOf(memo) }
-    val ctx = LocalPlatformContext.current
-    val loader = remember(ctx) { ImageLoader(ctx) }
+    val loader = koinInject<ImageLoader>()
     val scope = rememberCoroutineScope()
 
     LazyColumn(

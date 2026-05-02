@@ -1,5 +1,6 @@
 package io.awairo.di
 
+import coil3.PlatformContext
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.SharedPreferencesSettings
 import io.awairo.data.local.DatabaseFactory
@@ -9,6 +10,7 @@ import org.koin.dsl.module
 
 fun androidModule() = module {
     single { DatabaseFactory(androidContext()) }
+    single<PlatformContext> { androidContext() }
     // Sprint 1
     single { CameraController(androidContext()) }
     // Sprint 2

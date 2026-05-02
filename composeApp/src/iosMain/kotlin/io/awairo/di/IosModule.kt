@@ -1,5 +1,6 @@
 package io.awairo.di
 
+import coil3.PlatformContext
 import com.russhwolf.settings.NSUserDefaultsSettings
 import com.russhwolf.settings.Settings
 import io.awairo.data.local.DatabaseFactory
@@ -10,6 +11,7 @@ import platform.Foundation.NSUserDefaults
 
 fun iosModule() = module {
     single { DatabaseFactory() }
+    single<PlatformContext> { PlatformContext.INSTANCE }
     // Sprint 1
     single { CameraController() }
     // Sprint 2

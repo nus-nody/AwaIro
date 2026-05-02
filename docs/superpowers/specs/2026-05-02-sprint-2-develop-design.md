@@ -155,16 +155,20 @@ v1 では以下で「ふわっと揺らぐ泡」を表現する：
 - `pageCount` は `developedPhotos.size`
 - ページ間アニメーションは Compose 標準
 
-### 3.6 泡割れ演出
+### 3.6 泡割れ演出（Sprint 4+ に延期）
 
-タップ → 詳細画面遷移までの 800ms で以下を再生：
+**Sprint 2 では実装しない。** 泡タップ時の遷移は `App.kt` 全体共通の `AnimatedContent`（fadeIn + scaleIn / fadeOut + scaleOut）で簡易的に表現する。
 
-1. 0〜200ms: 泡が `scale 1.0 → 1.15` に膨らむ
-2. 200〜400ms: `alpha 1.0 → 0.0` でフェードしつつ `scale 1.15 → 0.0` に縮小
-3. 400ms 時点で AnimatedContent が PhotoDetailScreen に切替
-4. 400〜800ms: 写真が `alpha 0 → 1` + `scale 0.85 → 1.0` でフェードイン
+将来の Sprint 4+ で実装する詳細プロトタイプ（参考）:
+
+- 0〜200ms: 泡が `scale 1.0 → 1.15` に膨らむ
+- 200〜400ms: `alpha 1.0 → 0.0` でフェードしつつ `scale 1.15 → 0.0` に縮小
+- 400ms 時点で AnimatedContent が PhotoDetailScreen に切替
+- 400〜800ms: 写真が `alpha 0 → 1` + `scale 0.85 → 1.0` でフェードイン
 
 戻る時はこの逆再生。
+
+理由: ボーダー・モーフィングと同じく Compose の標準 API で素直に書けないため、Sprint 2 はリリース可能性を優先して標準のトランジションで進める。
 
 ### 3.7 メモ編集 UX
 
