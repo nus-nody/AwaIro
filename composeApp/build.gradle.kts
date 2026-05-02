@@ -57,6 +57,9 @@ kotlin {
             // Sprint 1 追加
             implementation(libs.coil.compose)
             implementation(libs.coil.core)
+            // Sprint 2 追加
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.coroutines)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
