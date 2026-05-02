@@ -1,6 +1,6 @@
 package io.awairo.presentation.theme
 
-import androidx.compose.runtime.compositionLocalOf
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import io.awairo.domain.model.SkyPalette
 import io.awairo.domain.model.ThemeMode
@@ -18,7 +18,7 @@ data class SkyTheme(
     val textSecondary: Color,
 )
 
-val LocalSkyTheme = compositionLocalOf<SkyTheme> {
+val LocalSkyTheme = staticCompositionLocalOf<SkyTheme> {
     error("SkyTheme not provided. Wrap your composable in CompositionLocalProvider(LocalSkyTheme provides ...)")
 }
 
@@ -70,7 +70,7 @@ private fun darkColorsFor(p: SkyPalette): PaletteColors = when (p) {
     )
     SkyPalette.KOMOREBI -> PaletteColors(
         Color(0xFF040C06), Color(0xFF061410),
-        Color(0xD9062312), Color(0xCC08321E), Color(0x801E2808),
+        Color(0xD9062312), Color(0xCC08321E), Color(0x8C1E2808),
         Color(0xCCFFFFFF), Color(0x80FFFFFF)
     )
     SkyPalette.AKATSUKI -> PaletteColors(
