@@ -32,3 +32,10 @@ WHERE captured_at >= ? AND captured_at < ?;
 
 deleteById:
 DELETE FROM Photo WHERE id = ?;
+
+selectAllOrderByCapturedAtDesc:
+SELECT * FROM Photo
+ORDER BY captured_at DESC;
+
+updateMemo:
+UPDATE Photo SET memo = ? WHERE id = ?;
