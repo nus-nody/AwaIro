@@ -45,13 +45,23 @@ SwiftUI + `@Observable` + Swift Concurrency / Clean Architecture 3 層 / Swift P
 
 ## Multi-agent harness
 
-専門エージェントを `.claude/agents/<name>.md` で定義。Orchestrator が `Agent` ツールで `subagent_type` 指定で dispatch。Phase 0 時点の役割:
+専門エージェントを `.claude/agents/<name>.md` で定義。Orchestrator が `Agent` ツールで `subagent_type` 指定で dispatch。Phase 1 開始前に 6 役全部揃った:
 
 - **architect** (Opus, HITL): アーキ判断 / ADR / Concept Guardrail 守護
 - **engineer** (Sonnet, HOTL): SwiftUI / Swift Concurrency 実装 / TDD
 - **reviewer** (Opus, HOTL→HITL escalation): バグ・セキュリティ・規約・Guardrail 照合
+- **test-engineer** (Sonnet, HOTL): テスト戦略 / Swift Testing / Snapshot 設計
+- **devops** (Sonnet/Haiku, HOTL): Makefile / xcodebuild / CI / Hooks 保守
+- **ux-designer** (Sonnet, HITL): SwiftUI 視覚デザイン / `design:*` プラグインスキル駆動
 
-Phase 1 末で **test-engineer / devops / ux-designer** を追加予定。詳細は [ADR 0002](docs/adr/0002-multi-agent-harness.md)。
+詳細は [ADR 0002](docs/adr/0002-multi-agent-harness.md)。
+
+### ⚠️ Subagent 利用上の注意
+
+`.claude/agents/*.md` のカスタム subagent_type は **Claude Code セッション開始時に load される**。**実行中のセッション内で新規追加・編集した agent 定義は次セッションまで反映されない**。
+
+- 新規 agent を追加した場合、即座に dispatch したいなら `Agent(subagent_type: "general-purpose", model: <choice>, prompt: <agent定義をprompt先頭に貼り付け>)` で代替可能
+- 既存 agent の定義変更も同様 — 反映には Claude Code 再起動が要る
 
 ## Build & test
 

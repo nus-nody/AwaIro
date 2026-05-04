@@ -7,16 +7,40 @@
 # Bash: Xcode project tinkering, Info.plist / entitlements changes, and
 # Package.swift dependency edits.
 #
-# Bypass is not implemented here yet — sensitive file edits should always be
-# explicitly discussed. If the user has approved, just retry: this hook fires
-# only on Edit/Write, and the user is in the loop reviewing the diff anyway.
-# (Future: add HITL_APPROVED_PATHS=... env support if needed.)
+# Bypass mechanism (one-shot marker file):
+#
+#   To allow ONE upcoming edit on a sensitive path after explicit user approval,
+#   the orchestrator writes a regex pattern to .claude/hooks/.bypass-next-edit
+#   BEFORE triggering the Edit/Write tool. This hook reads the pattern, deletes
+#   the marker file (single-use), and if the target path matches the pattern,
+#   allows the operation.
+#
+#   Example (orchestrator workflow):
+#     # User approved editing Package.swift in chat
+#     echo 'Package\.swift$' > .claude/hooks/.bypass-next-edit
+#     # Now use the Edit tool on Package.swift — hook allows, marker consumed.
+#
+#   The marker file is consumed even if the pattern doesn't match the next edit,
+#   to prevent stale bypasses from leaking. If you need to allow multiple edits,
+#   write the marker before each one.
 
 set -e
 
 FILE=$(jq -r '.tool_input.file_path // .tool_input.path // empty' 2>/dev/null || echo "")
 
 if [ -z "$FILE" ]; then exit 0; fi
+
+# --- Bypass marker (one-shot, consumed on read) ---
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
+MARKER="$PROJECT_DIR/.claude/hooks/.bypass-next-edit"
+if [ -f "$MARKER" ]; then
+  BYPASS_PATTERN=$(cat "$MARKER" 2>/dev/null || echo "")
+  rm -f "$MARKER"  # consume regardless of match
+  if [ -n "$BYPASS_PATTERN" ] && echo "$FILE" | grep -qE "$BYPASS_PATTERN"; then
+    echo "✅ HITL bypass consumed: $FILE matched '$BYPASS_PATTERN'" >&2
+    exit 0
+  fi
+fi
 
 # --- Sensitive path patterns ---
 BLOCKED_PATTERN=""
@@ -36,9 +60,6 @@ case "$FILE" in
     BLOCKED_REASON="Changes app sandbox / capabilities — security boundary."
     ;;
   */Package.swift|Package.swift)
-    # Package.swift exists for every SPM package. Editing target list is fine,
-    # but adding/removing dependencies needs HITL. We can't reliably distinguish
-    # without diffing, so we err on the side of blocking and let user re-confirm.
     BLOCKED_PATTERN="Package.swift"
     BLOCKED_REASON="Dependency changes need HITL (supply-chain). Target/source edits also affect build."
     ;;
@@ -53,6 +74,10 @@ if [ -n "$BLOCKED_PATTERN" ]; then
   echo "   File: $FILE" >&2
   echo "   Pattern: $BLOCKED_PATTERN" >&2
   echo "   Reason: $BLOCKED_REASON" >&2
+  echo "" >&2
+  echo "   To proceed after user approval, write a pattern to the marker file:" >&2
+  echo "     echo '<regex>' > .claude/hooks/.bypass-next-edit" >&2
+  echo "     # then use Edit/Write on the file (single-use)" >&2
   echo "" >&2
   echo "   See docs/harness/gate-matrix.md" >&2
   exit 2

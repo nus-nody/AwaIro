@@ -30,3 +30,6 @@ Package.resolved
 
 # OS
 Thumbs.db
+
+# HITL bypass marker (one-shot, never commit)
+.claude/hooks/.bypass-next-edit
