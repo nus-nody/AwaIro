@@ -56,8 +56,9 @@ verify: build test lint
 	@echo "✅ make verify passed (build + test + lint)"
 
 archive-kmp:
-	@KMP_FILES=$$(ls build.gradle.kts settings.gradle.kts gradlew gradle.properties 2>/dev/null; \
-		ls -d gradle composeApp 2>/dev/null) ; \
+	@KMP_FILES=$$(ls build.gradle.kts settings.gradle.kts gradlew gradlew.bat gradle.properties 2>/dev/null; \
+		ls -d gradle composeApp iosApp 2>/dev/null; \
+		ls .github/workflows/ci.yml 2>/dev/null) ; \
 	if [ -z "$$KMP_FILES" ]; then \
 		echo "✅ No KMP files found at repo root. Nothing to archive."; \
 		exit 0; \
