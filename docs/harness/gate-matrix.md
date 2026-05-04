@@ -14,15 +14,34 @@
 
 ### 🔴 HITL — 都度承認が必要
 
-| 操作 | 理由 |
-|------|------|
-| `git push` / PR 作成 / PR merge | 共有状態への公開、不可逆寄り |
-| branch 削除（特に main 系）| 不可逆 |
-| ファイル一括削除（>5 ファイル or >100 行）| 巻き戻しコスト大 |
-| DB スキーマ変更 / マイグレーション | データ破壊リスク |
-| Xcode project / Info.plist / entitlements 変更 | ビルド全体への波及 |
-| 依存追加/削除（Package.resolved 変動）| サプライチェーン |
-| ADR 確定 / Concept Guardrail 変更 | 設計憲法レベル |
+| 操作 | 理由 | 自動 block |
+|------|------|----------|
+| `git push` / PR 作成 / PR merge | 共有状態への公開、不可逆寄り | ✅ hitl-bash-gate.sh |
+| `git branch -D` / 強制 branch 削除 | 不可逆 | ✅ hitl-bash-gate.sh |
+| `git rm -r` (mass) / `rm -rf` | 巻き戻しコスト大 | ✅ hitl-bash-gate.sh |
+| `git reset --hard` | 未 commit 作業破棄 | ✅ hitl-bash-gate.sh |
+| `git merge` | 履歴に影響 | ✅ hitl-bash-gate.sh |
+| `brew/npm/pip install` | サプライチェーン | ✅ hitl-bash-gate.sh |
+| Xcode project / workspace 内部編集 | ビルド全体への波及 | ✅ hitl-edit-gate.sh |
+| `Info.plist` 編集 | 権限・capabilities | ✅ hitl-edit-gate.sh |
+| `*.entitlements` 編集 | サンドボックス境界 | ✅ hitl-edit-gate.sh |
+| `Package.swift` 編集 | 依存・ターゲット定義 | ✅ hitl-edit-gate.sh |
+| `Package.resolved` 編集 | pinned dep 改ざん | ✅ hitl-edit-gate.sh |
+| DB スキーマ変更 / マイグレーション | データ破壊リスク | ⚠️ 規約のみ（自動 block 不可）|
+| ADR 確定 / Concept Guardrail 変更 | 設計憲法レベル | ⚠️ 規約のみ |
+
+#### HITL bypass — ユーザー承認済み操作の素通し
+
+人がチャットで明示的に承認した HITL 操作は、Bash コマンドの先頭に `HITL_BYPASS=1` を付けて実行すれば `hitl-bash-gate.sh` を素通りできる:
+
+```bash
+HITL_BYPASS=1 git push origin main
+HITL_BYPASS=1 brew install swift-format
+```
+
+**使うタイミング:** ユーザーが「OK」「承認」等の明示同意を返した直後、その操作1回限り。bypass の使用は記録目的なので、**ユーザー承認なしに自分で付けるのは規約違反**。Reviewer エージェントは PR 内に `HITL_BYPASS=1` の使用がある場合、対応するチャット承認の経緯を確認する。
+
+`hitl-edit-gate.sh`（sensitive file 編集）には現時点で bypass 機構なし。Edit/Write はユーザーが diff を見れる状況で起きるため、必要なら手動で hook を一時無効化（settings.json から削除）して再有効化する運用。
 
 ### 🟡 HOTL — 自動進行・差分通知
 

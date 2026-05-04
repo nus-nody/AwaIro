@@ -9,6 +9,15 @@
             "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/hitl-bash-gate.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/hitl-edit-gate.sh"
+          }
+        ]
       }
     ],
     "PostToolUse": [
