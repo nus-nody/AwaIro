@@ -97,27 +97,44 @@ make help       # 全ターゲット
 
 ## Swift 落とし穴（過去に踏んだ事例から）
 
-### Public API を extension で公開する時
+### `resources:` の path 指定は file 単位で
 
-`extension X { public func foo() }` は **外部モジュールから foo を呼び出せない**（Phase 2 で踏んだ）。extension 自体の access modifier がメンバーの上限になるため、internal extension（既定）の中で `public func` と書いても effective access は internal に制限される。
-
-正しい形:
+`.target(name: ..., resources: [.process("Dir")])` は `Dir/` 配下の **すべて** をリソース扱いにする — `.swift` も Source ではなく Resource として扱われ、コンパイルされない。Metal shader (`.metal`) のような特定ファイルだけ bundle したい時は file 名まで指定:
 
 ```swift
+resources: [.process("Effects/BubbleDistortion.metal")]
+```
+
+Phase 2 で `extension View { public func bubbleDistortion }` が "value has no member" エラーになった真の原因はこれだった（extension visibility ではない）。
+
+### swift-format の `NoAccessLevelOnExtensionDeclaration` ルール
+
+swift-format（既定）は `public extension X { func foo() }` を **error として flag** する。代わりに `extension X { public func foo() }` を強制する:
+
+```swift
+// ❌ swift-format error
 public extension View {
-    func bubbleDistortion(...) -> some View { ... }  // ← public extension の中なので OK
+    func foo() { }
+}
+
+// ✅ accepted
+extension View {
+    public func foo() { }
 }
 ```
 
-または:
+両者とも cross-module visibility は同じ（`public func` のメンバー側 modifier が効く）。`make lint` 通過のために後者を使う。
 
-```swift
-public extension View {
-    func foo() { ... }
-}
+### iOS-only コードのビルド検証
+
+`#if canImport(UIKit)` で囲った関数は macOS swift build ではスキップされる。新規 public API（特に SwiftUI ViewModifier 等）を追加したら、必ず iOS build を 1 回通すこと:
+
+```bash
+xcodebuild build -project App/AwaIro.xcodeproj -scheme AwaIro \
+  -destination 'platform=iOS Simulator,name=iPhone 16 (AwaIro)'
 ```
 
-iOS-only コードは `#if canImport(UIKit)` で囲うので macOS swift build では検査されず、初回 iOS build で初めて検出される。新規 public API を extension で公開するときは **iOS build を 1 回通して確認** すること。
+`make test-ios` でカバーされるが、新 API 追加直後に手動で 1 回確認するのが安全。
 
 ### Apple framework を `actor` で wrap する時
 
@@ -135,5 +152,5 @@ Phase 2 で 1 dispatch = 5 task の subagent が 2 度途中終了した。**1 d
 - 新規依存追加を user 承認なしで実行
 - 「動いたから commit」する前に `make verify` を実行しない
 - 機械的 1:1 KMP ポート（SwiftUI / Swift Concurrency の自然形に再構築する）
-- `extension X { public func }`（cross-module で見えない — `public extension X { func }` を使う）
-- `actor` で `@MainActor` プロパティを持つ Apple framework wrap（`final class` を検討）
+- `actor` で `@MainActor` プロパティを持つ Apple framework wrap（`final class` を検討、ADR 0007）
+- `.process("DirName")` で `.swift` を含むディレクトリを指定（file 単位で specify する）

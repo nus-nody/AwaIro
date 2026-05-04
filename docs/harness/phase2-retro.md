@@ -17,7 +17,7 @@
 ## What didn't (friction points)
 
 - **Subagent termination mid-batch** — Twice the subagent stopped after writing tests but before implementing/committing. Solution explored: smaller batches OR inline takeover when state is clean
-- **Public extension visibility** — `extension View { public func bubbleDistortion }` doesn't expose the method across modules; required `public extension View { func bubbleDistortion }`. Caught only at iOS build
+- **`.process("Effects")` resource path was the real culprit** — initially blamed extension visibility, but post-Phase-2 investigation (retro item E) showed swift-format's `NoAccessLevelOnExtensionDeclaration` rule auto-formatted `public extension` → `extension { public func }`, and the cross-module visibility is identical between the two forms. The actual cause of the "value has no member" error was that BubbleDistortion.swift was bundled as a Resource (not Source) due to `.process("Effects")` matching the whole directory. Fix: `.process("Effects/BubbleDistortion.metal")`
 - **`resources: [.process("Effects")]`** treats every file in Effects/ as a resource, including BubbleDistortion.swift (which should be source). Fixed to `.process("Effects/BubbleDistortion.metal")`
 - **`@MainActor` cross-context closure call** — HomeScreen.onCaptured needed `@MainActor` annotation AND `await` at the call site
 - **Simulator camera UX** — Empty AVCaptureVideoPreviewLayer renders the wrapping UIView's default backgroundColor (white) — looked identical to Phase 1 placeholder until backgroundColor = .black was set
@@ -39,7 +39,7 @@
 |------|------|------|------|
 | Task 7 | `actor AVFoundationCameraController` | `final class @unchecked Sendable` with `@MainActor init` | Swift 6 strict concurrency: actor init can't capture @MainActor stored property |
 | Task 8 | `resources: [.process("Effects")]` | `.process("Effects/BubbleDistortion.metal")` | .swift も resource 扱いで source として compile されない |
-| Task 8 | `extension View { public func ... }` | `public extension View { func ... }` | 外部モジュールから見えない |
+| Task 8 | `extension View { public func ... }` | `extension View { public func ... }`（plan 通り、auto-formatter で固定）| 当初 `public extension` への変更が必要と判断したが、retro item E で誤りと判明（真因は resource path）|
 | Task 9 | 専用 shader snapshot test | 削除（HomeScreen snapshot で間接 cover）| YAGNI / 視覚 regression リスク低 |
 | Task 13 | `.accessibilityAddTraits(.isButton)` | `SwiftUI.AccessibilityTraits.isButton` 明示 | UIKit と曖昧 |
 | Task 15 | `onCaptured: (URL, Date) -> Void` | `@MainActor (URL, Date) -> Void` + `await` | Swift 6 actor 境界 |
