@@ -1,25 +1,20 @@
 import SwiftUI
 
-public struct HomeScreen: View {
-  @State private var viewModel: HomeViewModel
+/// Pure state-driven content view — no async load, no ViewModel dependency.
+/// Used directly by snapshot tests and composed inside HomeScreen.
+struct HomeContentView: View {
+  let state: HomeState
 
-  public init(viewModel: HomeViewModel) {
-    _viewModel = State(initialValue: viewModel)
-  }
-
-  public var body: some View {
+  var body: some View {
     ZStack {
       Color.black.ignoresSafeArea()
       content
-    }
-    .task {
-      await viewModel.load(now: Date())
     }
   }
 
   @ViewBuilder
   private var content: some View {
-    switch viewModel.state {
+    switch state {
     case .loading:
       ProgressView()
         .tint(.white)
@@ -46,6 +41,21 @@ public struct HomeScreen: View {
           .foregroundStyle(.white.opacity(0.6))
       }
     }
+  }
+}
+
+public struct HomeScreen: View {
+  @State private var viewModel: HomeViewModel
+
+  public init(viewModel: HomeViewModel) {
+    _viewModel = State(initialValue: viewModel)
+  }
+
+  public var body: some View {
+    HomeContentView(state: viewModel.state)
+      .task {
+        await viewModel.load(now: Date())
+      }
   }
 }
 
