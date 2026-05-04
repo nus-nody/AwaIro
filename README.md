@@ -64,8 +64,8 @@ AwaIroData                         # GRDB, repository 実装
 
 | Sprint / Phase | 機能 | 状態 |
 |---------------|------|------|
-| Conversion Phase 0 | Bootstrap（本フェーズ）| 🔨 進行中 |
-| Conversion Phase 1 | Walking Skeleton | 📋 計画予定 |
+| Conversion Phase 0 | Bootstrap | ✅ 完了 |
+| Conversion Phase 1 | Walking Skeleton | 📋 次フェーズ |
 | Conversion Phase 2 | Sprint 1 (記録) port | 📋 計画予定 |
 | Conversion Phase 3 | Sprint 2 (現像) ネイティブ実装 | 📋 計画予定 |
 | 旧 Sprint 0/1 | KMP 基盤・記録機能 | 📦 archive/kmp ブランチに保管 |
@@ -76,5 +76,5 @@ AwaIroData                         # GRDB, repository 実装
 
 ```bash
 git fetch origin archive/kmp
-git checkout archive/kmp -- composeApp/    # 部分的に復活させたい場合
+git checkout origin/archive/kmp -- composeApp/    # 部分的に復活させたい場合
 ```
