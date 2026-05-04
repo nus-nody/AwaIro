@@ -5,7 +5,7 @@
 PACKAGES := AwaIroDomain AwaIroData AwaIroPlatform AwaIroPresentation
 SWIFT_FORMAT := $(shell command -v swift-format 2>/dev/null)
 
-.PHONY: all bootstrap build test test-snapshot lint verify archive-kmp clean help
+.PHONY: all bootstrap build test test-ios test-snapshot test-app-smoke lint verify archive-kmp clean clean-build help
 
 all: verify
 
@@ -21,7 +21,8 @@ help:
 	@echo "  verify        - build + test + test-ios + lint (DoD check)"
 	@echo "  archive-kmp   - guarded helper: archive any remaining KMP files"
 	@echo "                  Set ARCHIVE_CONFIRM=1 to actually delete (HITL)"
-	@echo "  clean         - remove .build directories"
+	@echo "  clean         - remove .build directories under packages/"
+	@echo "  clean-build   - remove root build/ (xcodebuild derived artifacts)"
 
 bootstrap:
 	@for pkg in $(PACKAGES); do \
@@ -93,3 +94,12 @@ clean:
 		rm -rf packages/$$pkg/.build packages/$$pkg/.swiftpm; \
 	done
 	@echo "✅ Cleaned all package build artifacts"
+
+clean-build:
+	@if [ -d build ]; then \
+		echo "==> Removing root build/ (xcodebuild derived artifacts)"; \
+		rm -rf build/; \
+		echo "✅ Cleaned build/"; \
+	else \
+		echo "✅ No build/ directory to clean"; \
+	fi

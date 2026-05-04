@@ -25,4 +25,17 @@ struct FilePathProviderTests {
     let exists = FileManager.default.fileExists(atPath: tmp.path, isDirectory: &isDir)
     #expect(exists && isDir.boolValue)
   }
+
+  @Test("photoDirectory is under root and exists after access")
+  func photoDirectoryExists() throws {
+    let tmp = FileManager.default.temporaryDirectory
+      .appendingPathComponent("awairo-test-\(UUID().uuidString)")
+    let provider = FilePathProvider(rootDirectory: tmp)
+    let dir = provider.photoDirectory
+    #expect(dir.path.hasPrefix(tmp.path))
+    #expect(dir.lastPathComponent == "photos")
+    var isDir: ObjCBool = false
+    let exists = FileManager.default.fileExists(atPath: dir.path, isDirectory: &isDir)
+    #expect(exists && isDir.boolValue)
+  }
 }

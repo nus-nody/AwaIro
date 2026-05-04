@@ -19,11 +19,17 @@ public struct FilePathProvider: Sendable {
   }
 
   public var databaseURL: URL {
-    ensureRootExists()
+    ensureDirectory(rootDirectory)
     return rootDirectory.appendingPathComponent("awairo.sqlite")
   }
 
-  private func ensureRootExists() {
-    try? FileManager.default.createDirectory(at: rootDirectory, withIntermediateDirectories: true)
+  public var photoDirectory: URL {
+    let dir = rootDirectory.appendingPathComponent("photos", isDirectory: true)
+    ensureDirectory(dir)
+    return dir
+  }
+
+  private func ensureDirectory(_ url: URL) {
+    try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
   }
 }

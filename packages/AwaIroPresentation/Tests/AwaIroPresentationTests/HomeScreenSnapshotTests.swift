@@ -4,18 +4,13 @@
   import SwiftUI
   import SnapshotTesting
   import AwaIroDomain
+  import AwaIroPlatform
   @testable import AwaIroPresentation
 
-  /// Snapshots target HomeContentView — the pure state-driven inner view that HomeScreen composes.
-  /// Snapshotting HomeScreen directly is not viable because its .task modifier resets state to
-  /// .loading before the synchronous snapshot renderer captures the frame.
-  /// HomeContentView has no async side-effects and renders deterministically for a given HomeState.
   @Suite("HomeScreen snapshot — G3 guardrail")
   @MainActor
   struct HomeScreenSnapshotTests {
 
-    /// G3 guardrail: View ツリーに「いいね数」「フォロワー」「閲覧」等の他者評価指標が現れないこと。
-    /// この test は禁止語が UI 文字列として描画されていないことを assert する。
     private let prohibitedWords: [String] = [
       "いいね", "Like", "Likes",
       "フォロワー", "Follower", "Followers",
@@ -23,43 +18,83 @@
       "シェア数", "Shares",
     ]
 
-    @Test("unrecorded snapshot is stable")
-    func unrecordedSnapshot() {
-      let host = UIHostingController(rootView: HomeContentView(state: .unrecorded))
+    @Test("unrecorded + authorized snapshot is stable")
+    func unrecordedAuthorizedSnapshot() {
+      let view = HomeContentView(
+        state: .unrecorded,
+        permission: .authorized,
+        bubble: { Circle().fill(.white.opacity(0.85)).frame(width: 280, height: 280) },
+        onRequestPermission: {}
+      )
+      let host = UIHostingController(rootView: view)
+      assertSnapshot(of: host, as: .image(on: .iPhoneX(.portrait)))
+    }
+
+    @Test("unrecorded + notDetermined snapshot is stable")
+    func unrecordedNotDeterminedSnapshot() {
+      let view = HomeContentView(
+        state: .unrecorded,
+        permission: .notDetermined,
+        bubble: { EmptyView() },
+        onRequestPermission: {}
+      )
+      let host = UIHostingController(rootView: view)
+      assertSnapshot(of: host, as: .image(on: .iPhoneX(.portrait)))
+    }
+
+    @Test("unrecorded + denied snapshot is stable")
+    func unrecordedDeniedSnapshot() {
+      let view = HomeContentView(
+        state: .unrecorded,
+        permission: .denied,
+        bubble: { EmptyView() },
+        onRequestPermission: {}
+      )
+      let host = UIHostingController(rootView: view)
       assertSnapshot(of: host, as: .image(on: .iPhoneX(.portrait)))
     }
 
     @Test("recorded snapshot is stable")
     func recordedSnapshot() {
-      let photo = Photo(
-        id: UUID(),
-        takenAt: Date(),
-        fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
-        memo: "preview"
+      let view = HomeContentView(
+        state: .recorded(
+          Photo(
+            id: UUID(),
+            takenAt: Date(),
+            fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
+            memo: "preview"
+          )),
+        permission: .authorized,
+        bubble: { EmptyView() },
+        onRequestPermission: {}
       )
-      let host = UIHostingController(rootView: HomeContentView(state: .recorded(photo)))
+      let host = UIHostingController(rootView: view)
       assertSnapshot(of: host, as: .image(on: .iPhoneX(.portrait)))
     }
 
-    @Test("HomeScreen contains no numeric-metric strings (G3)")
+    @Test("HomeContentView contains no numeric-metric strings (G3)")
     func noNumericMetrics() {
-      let photo = Photo(
-        id: UUID(),
-        takenAt: Date(),
-        fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
-        memo: "preview"
+      let view = HomeContentView(
+        state: .recorded(
+          Photo(
+            id: UUID(),
+            takenAt: Date(),
+            fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
+            memo: "preview"
+          )),
+        permission: .authorized,
+        bubble: { EmptyView() },
+        onRequestPermission: {}
       )
-      let host = UIHostingController(rootView: HomeContentView(state: .recorded(photo)))
+      let host = UIHostingController(rootView: view)
       host.loadViewIfNeeded()
       host.view.frame = UIScreen.main.bounds
       host.view.layoutIfNeeded()
-
       let allText = collectText(in: host.view)
       for word in prohibitedWords {
         #expect(
           !allText.contains(word),
-          "G3 guardrail violation: '\(word)' appeared in HomeScreen view tree.\nFull text: \(allText)"
-        )
+          "G3 guardrail violation: '\(word)' appeared.\nFull text: \(allText)")
       }
     }
 
