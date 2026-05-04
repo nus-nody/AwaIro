@@ -9,6 +9,9 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../AwaIroDomain"),
+        // GRDB.swift: solo-maintained (groue) but isolated to Data layer per
+        // ADR 0001. Bus-factor risk accepted; mitigation = Domain stays Pure
+        // Swift, so persistence layer is replaceable without core changes.
         .package(url: "https://github.com/groue/GRDB.swift", from: "7.0.0")
     ],
     targets: [
