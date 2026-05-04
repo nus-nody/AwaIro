@@ -11,6 +11,8 @@ DerivedData/
 .build/
 .swiftpm/
 Package.resolved
+# Allow App-target Package.resolved (canonical pinning source per ADR 0004)
+!App/AwaIro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
 # IDEs
 .idea/
