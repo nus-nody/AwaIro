@@ -95,6 +95,38 @@ make help       # 全ターゲット
 - gh CLI（GitHub 操作）
 - (任意) swift-format（`brew install swift-format`）
 
+## Swift 落とし穴（過去に踏んだ事例から）
+
+### Public API を extension で公開する時
+
+`extension X { public func foo() }` は **外部モジュールから foo を呼び出せない**（Phase 2 で踏んだ）。extension 自体の access modifier がメンバーの上限になるため、internal extension（既定）の中で `public func` と書いても effective access は internal に制限される。
+
+正しい形:
+
+```swift
+public extension View {
+    func bubbleDistortion(...) -> some View { ... }  // ← public extension の中なので OK
+}
+```
+
+または:
+
+```swift
+public extension View {
+    func foo() { ... }
+}
+```
+
+iOS-only コードは `#if canImport(UIKit)` で囲うので macOS swift build では検査されず、初回 iOS build で初めて検出される。新規 public API を extension で公開するときは **iOS build を 1 回通して確認** すること。
+
+### Apple framework を `actor` で wrap する時
+
+`actor` の init から `@MainActor` 隔離された stored property に直接書き込めない（Swift 6 strict concurrency が拒否）。Apple の framework 型（`AVCaptureSession`, `AVCaptureVideoPreviewLayer` 等）は **多くが thread-safe** なので、actor ではなく `final class @unchecked Sendable + @MainActor init` で wrap する方が現実的（Phase 2 ADR 0007 参照）。
+
+### Subagent dispatch のサイズ感
+
+Phase 2 で 1 dispatch = 5 task の subagent が 2 度途中終了した。**1 dispatch あたり 2-3 task max** を目安に。タスクが 5+ ある時は 2 batch に分ける。subagent が中断したら git status で実状態を確認し、必要なら orchestrator が引き継ぐ（state がクリーンなら拾える）。
+
 ## やってはいけないこと
 
 - Domain 層への iOS フレームワーク import
@@ -103,3 +135,5 @@ make help       # 全ターゲット
 - 新規依存追加を user 承認なしで実行
 - 「動いたから commit」する前に `make verify` を実行しない
 - 機械的 1:1 KMP ポート（SwiftUI / Swift Concurrency の自然形に再構築する）
+- `extension X { public func }`（cross-module で見えない — `public extension X { func }` を使う）
+- `actor` で `@MainActor` プロパティを持つ Apple framework wrap（`final class` を検討）
