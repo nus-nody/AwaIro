@@ -14,9 +14,10 @@ help:
 	@echo "  bootstrap     - Resolve SPM dependencies for all packages"
 	@echo "  build         - swift build all packages"
 	@echo "  test          - swift test all packages"
-	@echo "  test-snapshot - run snapshot tests only (Phase 2+)"
+	@echo "  test-ios      - xcodebuild test (snapshot) + App build smoke test"
+	@echo "  test-snapshot - run snapshot tests only (xcodebuild on iOS Simulator)"
 	@echo "  lint          - swift-format --lint (no-op if not installed)"
-	@echo "  verify        - build + test + lint (DoD check)"
+	@echo "  verify        - build + test + test-ios + lint (DoD check)"
 	@echo "  archive-kmp   - guarded helper: archive any remaining KMP files"
 	@echo "                  Set ARCHIVE_CONFIRM=1 to actually delete (HITL)"
 	@echo "  clean         - remove .build directories"
@@ -39,8 +40,21 @@ test:
 		(cd packages/$$pkg && swift test) || exit 1; \
 	done
 
+test-ios: test-snapshot
+	@echo "==> xcodebuild build -scheme AwaIro (smoke test on iPhone 16 Simulator)"
+	@xcodebuild build \
+		-project App/AwaIro.xcodeproj \
+		-scheme AwaIro \
+		-destination 'platform=iOS Simulator,name=iPhone 16' \
+		-quiet 2>&1 | tail -5
+
 test-snapshot:
-	@echo "Snapshot tests not yet enabled (Phase 2+)."
+	@echo "==> Snapshot tests via xcodebuild (AwaIroPresentation SPM package)"
+	@cd packages/AwaIroPresentation && xcodebuild test \
+		-scheme AwaIroPresentation \
+		-destination 'platform=iOS Simulator,name=iPhone 16' \
+		-only-testing:AwaIroPresentationTests/HomeScreenSnapshotTests \
+		2>&1 | grep -E '(passed|failed|error:|TEST (SUCCEEDED|FAILED))' | tail -15
 
 lint:
 ifeq ($(SWIFT_FORMAT),)
@@ -51,9 +65,9 @@ else
 	@$(SWIFT_FORMAT) lint --recursive --strict packages/
 endif
 
-verify: build test lint
+verify: build test test-ios lint
 	@echo ""
-	@echo "✅ make verify passed (build + test + lint)"
+	@echo "✅ make verify passed (build + test + test-ios + lint)"
 
 archive-kmp:
 	@KMP_FILES=$$(ls build.gradle.kts settings.gradle.kts gradlew gradlew.bat gradle.properties 2>/dev/null; \
