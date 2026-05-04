@@ -61,7 +61,7 @@ AwaIro.xcworkspace
     │   ├── Share/                # ShareService
     │   └── Lifecycle/            # FirstLaunchGate
     └── AwaIroPresentation/       # SwiftUI Views + @Observable ViewModels
-        ├── Home/                 # HomeScreen + HomeViewModel
+        ├── Home/                 # HomeScreen (composes HomeContentView) + HomeViewModel + HomeContentView
         ├── Memo/                 # MemoScreen + MemoViewModel
         ├── Develop/              # DevelopScreen + DevelopViewModel (Sprint 2)
         └── Components/           # BubbleCameraView 等
@@ -295,8 +295,8 @@ HomeScreen の縦串だけポート:
 - Domain: `Photo` value type, `PhotoRepository` protocol, `GetTodayPhotoUseCase`
 - Data: `PhotoRepositoryImpl(GRDB)`, migration v1, `Photo` table
 - Platform: 最小 `FilePathProvider`
-- Presentation: `HomeScreen` + `HomeViewModel`, ナビゲーション枠
-- Test: `GetTodayPhotoUseCaseTests`（in-memory GRDB）/ `HomeScreenSnapshotTests`（数字なし guardrail 含む）
+- Presentation: `HomeScreen` + `HomeViewModel` + `HomeContentView` (state-driven inner view, used directly by snapshot tests to avoid async-load race), ナビゲーション枠
+- Test: `GetTodayPhotoUseCaseTests`（in-memory GRDB）/ `HomeScreenSnapshotTests`（HomeContentView を駆動、数字なし guardrail 含む）
 
 **Done 条件:** Simulator で起動して HomeScreen が表示 / テスト全緑 / `docs/harness/phase1-retro.md` に摩擦点記録 → 残り 3 役（test-engineer / devops / ux-designer）と hooks/gate を肉付け。
 
