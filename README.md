@@ -55,10 +55,10 @@ AwaIroData                         # GRDB, repository 実装
 |------|--------|----------|
 | iOS Architect | Opus 4.7 | HITL |
 | iOS Engineer | Sonnet 4.6 | HOTL |
-| Test Engineer (Phase 1+) | Sonnet 4.6 | HOTL |
+| Test Engineer | Sonnet 4.6 | HOTL |
 | Code Reviewer | Opus 4.7 | HOTL |
-| Build/DevOps Engineer (Phase 1+) | Sonnet 4.6 / Haiku 4.5 | HOTL |
-| UX Designer Light (Phase 1+) | Sonnet 4.6 | HITL |
+| Build/DevOps Engineer | Sonnet 4.6 / Haiku 4.5 | HOTL |
+| UX Designer Light | Sonnet 4.6 | HITL |
 
 ## スプリント
 
