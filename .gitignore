@@ -1,37 +1,35 @@
-# Gradle
-.gradle/
-build/
-!gradle/wrapper/gradle-wrapper.jar
+# macOS
+.DS_Store
 
-# IDE
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+*.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+# Allow App-target Package.resolved (canonical pinning source per ADR 0004)
+!App/AwaIro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+
+# IDEs
 .idea/
 *.iml
 .vscode/
 
-# Local machine config (never commit these)
-local.properties
+# Claude Code worktrees
+.claude/worktrees/
+
+# Claude Code local settings
 .claude/settings.local.json
-
-# Kotlin
-.kotlin/
-
-# iOS
-iosApp/Pods/
-iosApp/iosApp.xcodeproj/xcuserdata/
-iosApp/iosApp.xcodeproj/project.xcworkspace/xcuserdata/
-xcuserdata/
-*.xcuserstate
-DerivedData/
-
-# Node
-node_modules/
-
-# OS
-.DS_Store
-Thumbs.db
 
 # Superpowers
 .superpowers/
 
-# Git worktrees
-.worktrees/
+# OS
+Thumbs.db
+
+# HITL bypass marker (one-shot, never commit)
+.claude/hooks/.bypass-next-edit
