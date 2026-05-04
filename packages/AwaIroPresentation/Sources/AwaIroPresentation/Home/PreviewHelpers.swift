@@ -1,11 +1,17 @@
 #if DEBUG
   import Foundation
   import AwaIroDomain
+  import AwaIroPlatform
 
   @MainActor
   public enum PreviewHelpers {
     public static func unrecordedVM() -> HomeViewModel {
-      HomeViewModel(usecase: GetTodayPhotoUseCase(repository: AlwaysEmptyRepo()))
+      HomeViewModel(
+        usecase: GetTodayPhotoUseCase(repository: AlwaysEmptyRepo()),
+        cameraPermission: AlwaysAuthorizedPermission(),
+        capturePhotoData: { Data() },
+        photoFileStore: PhotoFileStore(filePathProvider: previewProvider())
+      )
     }
 
     public static func recordedVM() -> HomeViewModel {
@@ -16,8 +22,19 @@
         memo: "preview"
       )
       return HomeViewModel(
-        usecase: GetTodayPhotoUseCase(repository: AlwaysReturnRepo(photo: photo)))
+        usecase: GetTodayPhotoUseCase(repository: AlwaysReturnRepo(photo: photo)),
+        cameraPermission: AlwaysAuthorizedPermission(),
+        capturePhotoData: { Data() },
+        photoFileStore: PhotoFileStore(filePathProvider: previewProvider())
+      )
     }
+  }
+
+  private func previewProvider() -> FilePathProvider {
+    FilePathProvider(
+      rootDirectory:
+        FileManager.default.temporaryDirectory
+        .appendingPathComponent("awairo-preview-\(UUID().uuidString)"))
   }
 
   private struct AlwaysEmptyRepo: PhotoRepository {
@@ -29,5 +46,10 @@
     let photo: Photo
     func todayPhoto(now: Date) async throws -> Photo? { photo }
     func insert(_ photo: Photo) async throws {}
+  }
+
+  private struct AlwaysAuthorizedPermission: CameraPermission {
+    func currentStatus() async -> CameraPermissionStatus { .authorized }
+    func requestIfNeeded() async -> CameraPermissionStatus { .authorized }
   }
 #endif
