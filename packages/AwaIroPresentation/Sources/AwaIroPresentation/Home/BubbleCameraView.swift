@@ -39,7 +39,7 @@
           Task { await camera.stop() }
         }
         .accessibilityLabel("泡をタップして撮影")
-        .accessibilityAddTraits(.isButton)
+        .accessibilityAddTraits(SwiftUI.AccessibilityTraits.isButton)
     }
   }
 

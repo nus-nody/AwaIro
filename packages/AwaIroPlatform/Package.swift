@@ -17,7 +17,7 @@ let package = Package(
         .product(name: "AwaIroDomain", package: "AwaIroDomain")
       ],
       resources: [
-        .process("Effects")
+        .process("Effects/BubbleDistortion.metal")
       ]
     ),
     .testTarget(name: "AwaIroPlatformTests", dependencies: ["AwaIroPlatform"]),
