@@ -61,6 +61,12 @@
 
   @MainActor
   private final class CameraPreviewUIView: UIView {
+    override init(frame: CGRect) {
+      super.init(frame: frame)
+      backgroundColor = .black
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) not used") }
+
     var previewLayer: AVCaptureVideoPreviewLayer? {
       didSet {
         if let oldValue { oldValue.removeFromSuperlayer() }
