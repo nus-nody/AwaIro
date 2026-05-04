@@ -61,6 +61,7 @@ HITL_BYPASS=1 brew install swift-format
 | `swift-format` / `swift-format --fix`（hook 内） | 決定論的・可逆 |
 | SPM resolve（既存依存の解決）| 決定論的 |
 | Snapshot 差分の表示（記録は HOTL）| 副作用なし |
+| `make verify`（タスク完了時の自動実行）| 決定論的・副作用なし・失敗時即検知（Phase 0 末 retro で HOTL → HOOTL 降格、2026-05-04）|
 
 #### HOOTL 適格基準（全て満たすこと）
 
