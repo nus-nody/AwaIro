@@ -14,8 +14,9 @@ help:
 	@echo "  bootstrap     - Resolve SPM dependencies for all packages"
 	@echo "  build         - swift build all packages"
 	@echo "  test          - swift test all packages"
-	@echo "  test-ios      - xcodebuild test (snapshot) + App build smoke test"
-	@echo "  test-snapshot - run snapshot tests only (xcodebuild on iOS Simulator)"
+	@echo "  test-ios      - test-snapshot + test-app-smoke"
+	@echo "  test-snapshot - run snapshot tests (xcodebuild on iOS Simulator)"
+	@echo "  test-app-smoke - boot sim, install, launch, verify no crash (3s observation)"
 	@echo "  lint          - swift-format --lint (no-op if not installed)"
 	@echo "  verify        - build + test + test-ios + lint (DoD check)"
 	@echo "  archive-kmp   - guarded helper: archive any remaining KMP files"
@@ -40,13 +41,10 @@ test:
 		(cd packages/$$pkg && swift test) || exit 1; \
 	done
 
-test-ios: test-snapshot
-	@echo "==> xcodebuild build -scheme AwaIro (smoke test on iPhone 16 Simulator)"
-	@xcodebuild build \
-		-project App/AwaIro.xcodeproj \
-		-scheme AwaIro \
-		-destination 'platform=iOS Simulator,name=iPhone 16' \
-		-quiet 2>&1 | tail -5
+test-ios: test-snapshot test-app-smoke
+
+test-app-smoke:
+	@bash scripts/smoke-app.sh
 
 test-snapshot:
 	@echo "==> Snapshot tests via xcodebuild (AwaIroPresentation SPM package)"
