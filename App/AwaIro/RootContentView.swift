@@ -25,6 +25,12 @@ struct RootContentView: View {
             }
           )
           .navigationBarHidden(true)
+        case .gallery:
+          Text("Gallery — coming soon")
+            .navigationBarHidden(true)
+        case .photoDetail:
+          Text("Photo Detail — coming soon")
+            .navigationBarHidden(true)
         }
       }
     }

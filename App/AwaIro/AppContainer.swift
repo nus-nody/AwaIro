@@ -4,6 +4,7 @@ import AwaIroDomain
 import AwaIroPlatform
 import AwaIroPresentation
 import Foundation
+import SwiftUI
 
 @MainActor
 final class AppContainer {
@@ -50,5 +51,17 @@ final class AppContainer {
         try? storeRef.delete(at: url)
       }
     )
+  }
+
+  func makeGalleryViewModel() -> GalleryViewModel {
+    let repo = photoRepository
+    return GalleryViewModel(usecase: DevelopPhotoUseCase(repository: repo))
+  }
+
+  func makePhotoDetailViewModel(photo: Photo) -> PhotoDetailViewModel {
+    let repo = photoRepository
+    return PhotoDetailViewModel(
+      photo: photo,
+      updateMemo: UpdateMemoUseCase(repository: repo))
   }
 }
