@@ -8,17 +8,17 @@ public struct BubbleGalleryItem: View {
   public let now: Date
   public let size: CGFloat
 
+  @Environment(\.skyTheme) private var theme
+  @State private var floatY: CGFloat = 0
+
   public init(photo: Photo, now: Date, size: CGFloat = 145) {
     self.photo = photo
     self.now = now
     self.size = size
   }
 
-  @Environment(\.skyTheme) private var theme
-
   public var body: some View {
     ZStack {
-      // Bubble shell — translucent gradient
       Circle()
         .fill(
           RadialGradient(
@@ -31,12 +31,9 @@ public struct BubbleGalleryItem: View {
             startRadius: 0, endRadius: size
           )
         )
-        .overlay(
-          Circle().stroke(Color.white.opacity(0.35), lineWidth: 1)
-        )
+        .overlay(Circle().stroke(Color.white.opacity(0.35), lineWidth: 1))
 
       if photo.isDeveloped(now: now) {
-        // Photo inside the bubble
         AsyncImage(url: photo.fileURL) { image in
           image.resizable().scaledToFill()
         } placeholder: {
@@ -46,7 +43,6 @@ public struct BubbleGalleryItem: View {
         .clipShape(Circle())
         .accessibilityLabel("撮影した写真")
       } else {
-        // Undeveloped — show remaining time
         Text(remainingCopy)
           .font(.caption)
           .foregroundStyle(theme.textSecondary)
@@ -54,16 +50,24 @@ public struct BubbleGalleryItem: View {
       }
     }
     .frame(width: size, height: size)
+    .offset(y: floatY)
+    .onAppear { startFloat() }
+  }
+
+  private func startFloat() {
+    // Skip animation under XCTest / Swift Testing harness so snapshot frames stay deterministic.
+    if NSClassFromString("XCTestCase") != nil { return }
+    withAnimation(
+      .easeInOut(duration: Double.random(in: 4...8)).repeatForever(autoreverses: true)
+    ) {
+      floatY = -8
+    }
   }
 
   private var remainingCopy: String {
     let secs = max(0, photo.remainingUntilDeveloped(now: now))
     let hours = Int(secs / 3600)
-    if hours <= 0 {
-      return "もうすぐ"
-    } else {
-      return "あと\(hours)時間"
-    }
+    return hours <= 0 ? "もうすぐ" : "あと\(hours)時間"
   }
 }
 
