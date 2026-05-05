@@ -19,6 +19,7 @@ struct GetTodayPhotoUseCaseTests {
     let photo = Photo(
       id: UUID(),
       takenAt: now,
+      developedAt: now.addingTimeInterval(86400),
       fileURL: URL(fileURLWithPath: "/tmp/today.jpg"),
       memo: nil
     )

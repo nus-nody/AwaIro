@@ -18,6 +18,7 @@ public struct RecordPhotoUseCase: Sendable {
     let photo = Photo(
       id: UUID(),
       takenAt: takenAt,
+      developedAt: takenAt.addingTimeInterval(86400),
       fileURL: fileURL,
       memo: memo
     )
