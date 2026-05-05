@@ -26,7 +26,7 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
           """,
         arguments: [startOfDay.timeIntervalSince1970, endOfDay.timeIntervalSince1970]
       )
-      return row.map(Photo.init(row:))
+      return try row.map { try Photo(row: $0) }
     }
   }
 
@@ -57,7 +57,7 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
               FROM photos
               ORDER BY taken_at DESC
           """
-      ).map(Photo.init(row:))
+      ).map { try Photo(row: $0) }
     }
   }
 
@@ -73,7 +73,7 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
           """,
         arguments: [id.uuidString]
       )
-      return row.map(Photo.init(row:))
+      return try row.map { try Photo(row: $0) }
     }
   }
 
@@ -88,11 +88,15 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
 }
 
 extension Photo {
-  fileprivate init(row: Row) {
+  fileprivate init(row: Row) throws {
+    guard let developedAtRaw: Double = row["developed_at"] else {
+      throw DatabaseError(
+        message: "developed_at is NULL for photo id=\(row["id"] as String? ?? "?")")
+    }
     self.init(
       id: UUID(uuidString: row["id"])!,
       takenAt: Date(timeIntervalSince1970: row["taken_at"]),
-      developedAt: Date(timeIntervalSince1970: row["developed_at"]),
+      developedAt: Date(timeIntervalSince1970: developedAtRaw),
       fileURL: URL(string: row["file_url"])!,
       memo: row["memo"]
     )
