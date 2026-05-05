@@ -105,6 +105,16 @@ public struct GalleryContentView: View {
         onTapBack: onTapBack,
         onTapMenu: onTapMenu
       )
+      .overlay(alignment: .bottom) {
+        BottomActionBar(
+          leadingSystemName: "house.fill",
+          leadingLabel: "ホーム",
+          trailingSystemName: "paintpalette",
+          trailingLabel: "メニュー",
+          onTapLeading: onTapBack,
+          onTapTrailing: onTapMenu
+        )
+      }
       .task {
         await viewModel.load(now: Date())
         // Tick every 60s to flip undeveloped → developed without re-querying DB.
