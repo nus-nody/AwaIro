@@ -1,6 +1,8 @@
 import Foundation
 
 public struct RecordPhotoUseCase: Sendable {
+  private static let developWindow: TimeInterval = 86400  // 24h
+
   private let repository: any PhotoRepository
 
   public init(repository: any PhotoRepository) {
@@ -9,6 +11,7 @@ public struct RecordPhotoUseCase: Sendable {
 
   /// Inserts a new photo if no photo exists for today's calendar day.
   /// G1 guardrail: throws .alreadyRecordedToday if a photo already exists.
+  /// Sets developedAt to takenAt + 24h (G2 guardrail).
   /// Repository failures are wrapped in .repositoryFailure(message:).
   public func execute(fileURL: URL, takenAt: Date, memo: String?) async throws -> Photo {
     if try await repository.todayPhoto(now: takenAt) != nil {
@@ -18,7 +21,7 @@ public struct RecordPhotoUseCase: Sendable {
     let photo = Photo(
       id: UUID(),
       takenAt: takenAt,
-      developedAt: takenAt.addingTimeInterval(86400),
+      developedAt: takenAt.addingTimeInterval(Self.developWindow),
       fileURL: fileURL,
       memo: memo
     )
