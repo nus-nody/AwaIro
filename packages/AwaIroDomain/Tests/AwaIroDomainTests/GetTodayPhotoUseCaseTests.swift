@@ -62,4 +62,8 @@ private struct StubPhotoRepository: PhotoRepository {
   func insert(_ photo: Photo) async throws {
     // Not used in these tests
   }
+
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] { [] }
+  func findById(_ id: UUID) async throws -> Photo? { nil }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }

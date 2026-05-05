@@ -112,4 +112,10 @@ private final class FakePhotoRepository: PhotoRepository, @unchecked Sendable {
     }
     inserted.append(photo)
   }
+
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] {
+    inserted.sorted { $0.takenAt > $1.takenAt }
+  }
+  func findById(_ id: UUID) async throws -> Photo? { inserted.first { $0.id == id } }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }
