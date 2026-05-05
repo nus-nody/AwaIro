@@ -129,7 +129,9 @@ private final class FakeRepo: PhotoRepository, @unchecked Sendable {
   func todayPhoto(now: Date) async throws -> Photo? {
     if alreadyHasToday {
       return Photo(
-        id: UUID(), takenAt: now, fileURL: URL(fileURLWithPath: "/tmp/old.jpg"), memo: nil)
+        id: UUID(), takenAt: now,
+        developedAt: now.addingTimeInterval(86400),
+        fileURL: URL(fileURLWithPath: "/tmp/old.jpg"), memo: nil)
     }
     return nil
   }
@@ -137,4 +139,8 @@ private final class FakeRepo: PhotoRepository, @unchecked Sendable {
   func insert(_ photo: Photo) async throws {
     inserted.append(photo)
   }
+
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] { inserted.reversed() }
+  func findById(_ id: UUID) async throws -> Photo? { inserted.first { $0.id == id } }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }

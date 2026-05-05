@@ -63,6 +63,27 @@ SwiftUI + `@Observable` + Swift Concurrency / Clean Architecture 3 層 / Swift P
 - 新規 agent を追加した場合、即座に dispatch したいなら `Agent(subagent_type: "general-purpose", model: <choice>, prompt: <agent定義をprompt先頭に貼り付け>)` で代替可能
 - 既存 agent の定義変更も同様 — 反映には Claude Code 再起動が要る
 
+### Orchestrator のモデル / effort 選定（Phase 3 retro 由来）
+
+Subagent はそれぞれ agent 定義でモデル指定済みなので、**orchestrator (このセッション本体) のモデル選択がコスト/品質を決める**。Phase 3 retro で「Opus 4.7 + 超高は overkill 寄り」と判明したため、Phase 局面ごとに切り替える運用を推奨:
+
+| 局面 | 推奨モデル | effort | 理由 |
+|------|----------|--------|------|
+| Plan 作成 / ADR 起こし / brainstorm | Opus 4.7 (or fast 4.6) | 高 | 多分岐検討に extended thinking が効く |
+| Reviewer 評価 / Major issue 判断 / 設計レビュー | Opus 4.7 | 高 | 統合判断と trade-off 評価 |
+| TDD execution loop（subagent dispatch + 軽レビュー）| **Sonnet 4.6** | 中 | 大半のターン。routing 中心で Opus は過剰 |
+| Retro 執筆 / PR / merge ops / 状態確認 | **Sonnet 4.6** | 中 / 低 | 機械的タスク |
+
+**切り替え目安**:
+1. Phase kickoff → Opus 4.7 + 高（plan 作成）
+2. Plan 確定 → `/model` で Sonnet 4.6 + 中 に切り替え（execution）
+3. Final reviewer 評価ターンだけ Opus 4.7 に戻す
+4. Merge / retro → Sonnet 4.6
+
+`/fast` (Opus 4.6 fast mode) は plan 作成や reviewer 評価で Opus 4.7 と遜色なく、コストは下。要件次第で代替可。
+
+**effort budget (低/中/高/超高) の効き所**: 「超高」は実装ループでは ROI 低い。plan 作成 / reviewer 評価 / brainstorm のような **多選択肢を並列に検討するターン**だけで使う。
+
 ## Build & test
 
 ```

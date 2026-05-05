@@ -78,6 +78,18 @@ struct RecordPhotoUseCaseTests {
     #expect(repo.inserted.count == 2)
   }
 
+  @Test("sets developedAt to takenAt + 24 hours")
+  func setsDevelopedAt() async throws {
+    let repo = FakePhotoRepository()
+    let usecase = RecordPhotoUseCase(repository: repo)
+    let now = Date(timeIntervalSince1970: 1_730_000_000)
+    let url = URL(fileURLWithPath: "/tmp/x.jpg")
+
+    let saved = try await usecase.execute(fileURL: url, takenAt: now, memo: nil)
+
+    #expect(saved.developedAt == now.addingTimeInterval(86400))
+  }
+
   @Test("forwards repository failure as repositoryFailure")
   func forwardsRepositoryError() async {
     struct Boom: Error {}
@@ -112,4 +124,10 @@ private final class FakePhotoRepository: PhotoRepository, @unchecked Sendable {
     }
     inserted.append(photo)
   }
+
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] {
+    inserted.sorted { $0.takenAt > $1.takenAt }
+  }
+  func findById(_ id: UUID) async throws -> Photo? { inserted.first { $0.id == id } }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }

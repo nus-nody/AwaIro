@@ -19,6 +19,7 @@ struct GetTodayPhotoUseCaseTests {
     let photo = Photo(
       id: UUID(),
       takenAt: now,
+      developedAt: now.addingTimeInterval(86400),
       fileURL: URL(fileURLWithPath: "/tmp/today.jpg"),
       memo: nil
     )
@@ -61,4 +62,8 @@ private struct StubPhotoRepository: PhotoRepository {
   func insert(_ photo: Photo) async throws {
     // Not used in these tests
   }
+
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] { [] }
+  func findById(_ id: UUID) async throws -> Photo? { nil }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }

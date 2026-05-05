@@ -59,5 +59,8 @@
   private final class NoOpRepo: PhotoRepository, @unchecked Sendable {
     func todayPhoto(now: Date) async throws -> Photo? { nil }
     func insert(_ photo: Photo) async throws {}
+    func findAllOrderByTakenAtDesc() async throws -> [Photo] { [] }
+    func findById(_ id: UUID) async throws -> Photo? { nil }
+    func updateMemo(id: UUID, memo: String?) async throws {}
   }
 #endif

@@ -51,8 +51,12 @@ test-snapshot:
 	@echo "==> Snapshot tests via xcodebuild (AwaIroPresentation SPM package)"
 	@cd packages/AwaIroPresentation && xcodebuild test \
 		-scheme AwaIroPresentation \
-		-destination 'platform=iOS Simulator,name=iPhone 16' \
+		-destination 'platform=iOS Simulator,name=iPhone 16 (AwaIro)' \
 		-only-testing:AwaIroPresentationTests/HomeScreenSnapshotTests \
+		-only-testing:AwaIroPresentationTests/MemoScreenSnapshotTests \
+		-only-testing:AwaIroPresentationTests/GalleryScreenSnapshotTests \
+		-only-testing:AwaIroPresentationTests/PhotoDetailScreenSnapshotTests \
+		-only-testing:AwaIroPresentationTests/PaletteSheetSnapshotTests \
 		2>&1 | grep -E '(passed|failed|error:|TEST (SUCCEEDED|FAILED))' | tail -15
 
 lint:
