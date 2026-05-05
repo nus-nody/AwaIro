@@ -10,11 +10,15 @@ import SwiftUI
 final class AppContainer {
   let filePathProvider: FilePathProvider
   let photoRepository: any PhotoRepository
+  let themeRepository: any ThemeRepository
   let getTodayPhotoUseCase: GetTodayPhotoUseCase
   let recordPhotoUseCase: RecordPhotoUseCase
+  let developPhotoUseCase: DevelopPhotoUseCase
+  let updateMemoUseCase: UpdateMemoUseCase
   let cameraPermission: any CameraPermission
   let camera: any CameraController
   let photoFileStore: PhotoFileStore
+  let themeStore: ThemeStore
 
   init() throws {
     let provider = try FilePathProvider.defaultProduction()
@@ -24,11 +28,17 @@ final class AppContainer {
     let repo = PhotoRepositoryImpl(writer: pool)
     self.photoRepository = repo
 
+    let themeRepo = UserDefaultsThemeRepository()
+    self.themeRepository = themeRepo
+
     self.getTodayPhotoUseCase = GetTodayPhotoUseCase(repository: repo)
     self.recordPhotoUseCase = RecordPhotoUseCase(repository: repo)
+    self.developPhotoUseCase = DevelopPhotoUseCase(repository: repo)
+    self.updateMemoUseCase = UpdateMemoUseCase(repository: repo)
     self.cameraPermission = AVFoundationCameraPermission()
     self.camera = AVFoundationCameraController()
     self.photoFileStore = PhotoFileStore(filePathProvider: provider)
+    self.themeStore = ThemeStore(repository: themeRepo)
   }
 
   func makeHomeViewModel() -> HomeViewModel {
@@ -54,14 +64,10 @@ final class AppContainer {
   }
 
   func makeGalleryViewModel() -> GalleryViewModel {
-    let repo = photoRepository
-    return GalleryViewModel(usecase: DevelopPhotoUseCase(repository: repo))
+    GalleryViewModel(usecase: developPhotoUseCase)
   }
 
   func makePhotoDetailViewModel(photo: Photo) -> PhotoDetailViewModel {
-    let repo = photoRepository
-    return PhotoDetailViewModel(
-      photo: photo,
-      updateMemo: UpdateMemoUseCase(repository: repo))
+    PhotoDetailViewModel(photo: photo, updateMemo: updateMemoUseCase)
   }
 }
