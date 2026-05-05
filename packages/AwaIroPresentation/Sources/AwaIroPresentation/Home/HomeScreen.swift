@@ -75,15 +75,21 @@ struct HomeContentView<Bubble: View>: View {
     @State private var viewModel: HomeViewModel
     private let camera: any CameraController
     private let onCaptured: @MainActor (URL, Date) -> Void
+    private let onTapGallery: () -> Void
+    private let onTapMenu: () -> Void
 
     public init(
       viewModel: HomeViewModel,
       camera: any CameraController,
-      onCaptured: @escaping @MainActor (URL, Date) -> Void
+      onCaptured: @escaping @MainActor (URL, Date) -> Void,
+      onTapGallery: @escaping () -> Void,
+      onTapMenu: @escaping () -> Void
     ) {
       _viewModel = State(initialValue: viewModel)
       self.camera = camera
       self.onCaptured = onCaptured
+      self.onTapGallery = onTapGallery
+      self.onTapMenu = onTapMenu
     }
 
     public var body: some View {
@@ -102,6 +108,16 @@ struct HomeContentView<Bubble: View>: View {
           Task { await viewModel.requestCameraIfNeeded() }
         }
       )
+      .overlay(alignment: .bottom) {
+        BottomActionBar(
+          leadingSystemName: "circle.grid.3x3.fill",
+          leadingLabel: "泡たち",
+          trailingSystemName: "paintpalette",
+          trailingLabel: "メニュー",
+          onTapLeading: onTapGallery,
+          onTapTrailing: onTapMenu
+        )
+      }
       .task {
         await viewModel.load(now: Date())
       }
