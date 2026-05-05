@@ -56,6 +56,7 @@ test-snapshot:
 		-only-testing:AwaIroPresentationTests/MemoScreenSnapshotTests \
 		-only-testing:AwaIroPresentationTests/GalleryScreenSnapshotTests \
 		-only-testing:AwaIroPresentationTests/PhotoDetailScreenSnapshotTests \
+		-only-testing:AwaIroPresentationTests/PaletteSheetSnapshotTests \
 		2>&1 | grep -E '(passed|failed|error:|TEST (SUCCEEDED|FAILED))' | tail -15
 
 lint:
