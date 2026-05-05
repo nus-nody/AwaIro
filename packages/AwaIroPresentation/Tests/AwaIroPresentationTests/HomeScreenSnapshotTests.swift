@@ -56,11 +56,13 @@
 
     @Test("recorded snapshot is stable")
     func recordedSnapshot() {
+      let takenAt = Date()
       let view = HomeContentView(
         state: .recorded(
           Photo(
             id: UUID(),
-            takenAt: Date(),
+            takenAt: takenAt,
+            developedAt: takenAt.addingTimeInterval(86400),
             fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
             memo: "preview"
           )),
@@ -74,11 +76,13 @@
 
     @Test("HomeContentView contains no numeric-metric strings (G3)")
     func noNumericMetrics() {
+      let takenAt = Date()
       let view = HomeContentView(
         state: .recorded(
           Photo(
             id: UUID(),
-            takenAt: Date(),
+            takenAt: takenAt,
+            developedAt: takenAt.addingTimeInterval(86400),
             fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
             memo: "preview"
           )),

@@ -18,7 +18,7 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
       let row = try Row.fetchOne(
         db,
         sql: """
-              SELECT id, taken_at, file_url, memo
+              SELECT id, taken_at, developed_at, file_url, memo
               FROM photos
               WHERE taken_at >= ? AND taken_at < ?
               ORDER BY taken_at DESC
@@ -34,15 +34,54 @@ public final class PhotoRepositoryImpl: PhotoRepository, @unchecked Sendable {
     try await writer.write { db in
       try db.execute(
         sql: """
-              INSERT INTO photos (id, taken_at, file_url, memo)
-              VALUES (?, ?, ?, ?)
+              INSERT INTO photos (id, taken_at, developed_at, file_url, memo)
+              VALUES (?, ?, ?, ?, ?)
           """,
         arguments: [
           photo.id.uuidString,
           photo.takenAt.timeIntervalSince1970,
+          photo.developedAt.timeIntervalSince1970,
           photo.fileURL.absoluteString,
           photo.memo,
         ]
+      )
+    }
+  }
+
+  public func findAllOrderByTakenAtDesc() async throws -> [Photo] {
+    try await writer.read { db in
+      try Row.fetchAll(
+        db,
+        sql: """
+              SELECT id, taken_at, developed_at, file_url, memo
+              FROM photos
+              ORDER BY taken_at DESC
+          """
+      ).map(Photo.init(row:))
+    }
+  }
+
+  public func findById(_ id: UUID) async throws -> Photo? {
+    try await writer.read { db in
+      let row = try Row.fetchOne(
+        db,
+        sql: """
+              SELECT id, taken_at, developed_at, file_url, memo
+              FROM photos
+              WHERE id = ?
+              LIMIT 1
+          """,
+        arguments: [id.uuidString]
+      )
+      return row.map(Photo.init(row:))
+    }
+  }
+
+  public func updateMemo(id: UUID, memo: String?) async throws {
+    try await writer.write { db in
+      try db.execute(
+        sql: "UPDATE photos SET memo = ? WHERE id = ?",
+        arguments: [memo, id.uuidString]
       )
     }
   }
@@ -53,6 +92,7 @@ extension Photo {
     self.init(
       id: UUID(uuidString: row["id"])!,
       takenAt: Date(timeIntervalSince1970: row["taken_at"]),
+      developedAt: Date(timeIntervalSince1970: row["developed_at"]),
       fileURL: URL(string: row["file_url"])!,
       memo: row["memo"]
     )

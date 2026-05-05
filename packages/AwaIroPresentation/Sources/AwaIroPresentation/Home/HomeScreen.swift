@@ -138,11 +138,13 @@ struct HomeContentView<Bubble: View>: View {
   }
 
   #Preview("recorded") {
+    let takenAt = Date()
     HomeContentView(
       state: .recorded(
         Photo(
           id: UUID(),
-          takenAt: Date(),
+          takenAt: takenAt,
+          developedAt: takenAt.addingTimeInterval(86400),
           fileURL: URL(fileURLWithPath: "/tmp/preview.jpg"),
           memo: "preview"
         )),

@@ -38,6 +38,7 @@ struct HomeViewModelTests {
     let now = Date()
     let photo = Photo(
       id: UUID(), takenAt: now,
+      developedAt: now.addingTimeInterval(86400),
       fileURL: URL(fileURLWithPath: "/tmp/x.jpg"), memo: nil
     )
     let vm = HomeViewModel(
@@ -157,6 +158,9 @@ private struct StubRepo: PhotoRepository {
     return value
   }
   func insert(_ photo: Photo) async throws {}
+  func findAllOrderByTakenAtDesc() async throws -> [Photo] { value.map { [$0] } ?? [] }
+  func findById(_ id: UUID) async throws -> Photo? { value?.id == id ? value : nil }
+  func updateMemo(id: UUID, memo: String?) async throws {}
 }
 
 private final class FakePermission: CameraPermission, @unchecked Sendable {
